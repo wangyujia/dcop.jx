@@ -1,6 +1,8 @@
 package JX;
 
-
+/*
+ * ´íÎóÂë¶¨Òå
+ */
 public enum Errno
 {
     SUCCESS(0),
