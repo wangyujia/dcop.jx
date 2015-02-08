@@ -1,7 +1,7 @@
 package JX;
 
 /*
- * 错误码定义
+ * 错误码定义 errno definitions
  */
 public enum Errno
 {
