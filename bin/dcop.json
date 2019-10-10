@@ -1,0 +1,150 @@
+{
+    "sysid": 1,
+    "sysinfo": "dcop.iot",
+    "threadsafe": true,
+    "debug": true,
+    "objects":
+    [
+        {
+            "inst": "dispatch",
+            "threadsafe": true
+        },
+        {
+            "inst": "response",
+            "threadsafe": true
+        },
+        {
+            "inst": "notify",
+            "threadsafe": true
+        },
+        {
+            "inst": "control",
+            "threadsafe": true
+        },
+        {
+            "inst": "timer",
+            "threadsafe": true
+        },
+        {
+            "inst": "schedule",
+            "threadsafe": true,
+            "taskcount": 20
+        },
+        {
+            "inst": "status",
+            "threadsafe": true
+        },
+        {
+            "inst": "model",
+            "threadsafe": true
+        },
+        {
+            "inst": "data",
+            "threadsafe": true,
+            "datatype1": "mem",
+            "datatype2": "file",
+            "datacfg2": "-hash,44636F70"
+        },
+        {
+            "inst": "connect",
+            "threadsafe": true,
+            "netchannel1": {
+                "name": "udp",
+                "info": "server",
+                "type": "local",
+                "sock": "udp",
+                "port": 50001
+            },
+            "netchannel2": {
+                "name": "tcp",
+                "info": "server",
+                "type": "local",
+                "sock": "tcp",
+                "port": 50002
+            }
+        },
+        {
+            "inst": "proxy",
+            "threadsafe": true
+        },
+        {
+            "inst": "access",
+            "threadsafe": true
+        },
+        {
+            "inst": "secure",
+            "threadsafe": true
+        },
+        {
+            "inst": "command",
+            "threadsafe": true,
+            "TelnetdPort": 2322,
+            "UpperCaseTitle": true
+        },
+        {
+            "inst": "http.server",
+            "threadsafe": true,
+            "LanTaskCount": 1,
+            "ProcTaskCount": 20,
+            "HttpdPort": 80,
+            "HttpdDir": "../../../hdc/pipeline",
+            "HttpdHome": "index.html",
+            "PathMaps": {
+                "/iot/edge/": {
+                    "path": "../../app/iot/3_edge/",
+                    "type": "vthome"
+                }
+            }
+        },
+        {
+            "inst": "http.session",
+            "threadsafe": true
+        },
+        {
+            "inst": "session",
+            "threadsafe": true
+        },
+        {
+            "inst": "user",
+            "threadsafe": true,
+            "UserDataType": "file"
+        },
+        {
+            "inst": "group",
+            "threadsafe": true,
+            "GroupDataType": "file",
+            "GroupUserDataType": "file"
+        },
+        {
+            "inst": "center",
+            "threadsafe": true
+        },
+        {
+            "inst": "service",
+            "threadsafe": true
+        },
+        {
+            "inst": "monitor",
+            "threadsafe": true
+        },
+        {
+            "inst": "file.server",
+            "threadsafe": true
+        },
+        {
+            "inst": "script.js",
+            "threadsafe": true,
+            "debug": true,
+            "loadpaths": "../../"
+        },
+        {
+            "inst": "iot.edge",
+            "threadsafe": true,
+            "HeartBeatTimeout": 60,
+            "DisconnectTimeout": 10,
+            "netchannel": "iot.edge.connect.json",
+            "modelcfg": "iot.edge.model.json",
+            "jsmainfile": "iot.edge.main.js"
+        }
+    ]
+}

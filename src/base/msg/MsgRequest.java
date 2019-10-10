@@ -1,0 +1,103 @@
+package com.dcop.jx.core.base.msg;
+
+import java.nio.*;
+
+import com.dcop.jx.entry.*;
+import com.dcop.jx.core.base.*;
+
+
+/**
+ * 请求消息头
+ */
+public class MsgRequest {
+
+    public static byte HeaderType = 2;
+    public static byte HeaderSize = 8;
+
+    public byte        headType;                // 头部类型(见'DCOP_MSG_HEAD_TYPE')
+    public byte        headSize;                // 头部大小(见'DCOP_MSG_HEAD_SIZE')
+    public short       valueLen;                // 头部后面的值的长度
+    public short       paraCount;               // 参数个数
+    public short       paraLen;                 // 参数长度
+
+    public MsgPacket   msg;                     // 指向的消息包
+    public int         pos;                     // 会话的值位于消息包数据区的位置
+
+
+    public MsgRequest() {
+        headType = HeaderType;
+        headSize = HeaderSize;
+        valueLen = 0;
+        paraCount = 0;
+        paraLen = 0;
+        msg = null;
+        pos = 0;
+    }
+
+
+    /**
+     * 从消息包中解析请求消息头
+     * @param MsgPacket msg 消息包
+     * @return MsgRequest 请求消息头
+     */
+    public MsgRequest parse(MsgPacket msg) {
+        if (msg == null) {
+            return this;
+        }
+
+        ByteBuffer buffer = msg.getData();
+        if (buffer == null) {
+            return this;
+        }
+
+        /// 缓冲区的可读长度必须大于基本帧长
+        int position = buffer.position();
+        int bufLen = buffer.limit() - position;
+        if (bufLen < HeaderSize) {
+            return this;
+        }
+
+        /// 头部校验必须正确
+        byte headType  = buffer.get();
+        byte headSize  = buffer.get();
+        if ((headType != HeaderType) ||
+            (headSize != HeaderSize)) {
+            buffer.position(position);
+            return this;
+        }
+
+        /// 获取帧头
+        this.headType = headType;
+        this.headSize = headSize;
+        this.valueLen = buffer.getShort();
+        this.paraCount = buffer.getShort();
+        this.paraLen = buffer.getShort();
+        this.msg = msg;
+        this.pos = buffer.position();
+
+        /// 偏移过处理后的数据
+        buffer.position(position + headSize);
+        return this;
+    }
+
+
+    /**
+     * 把请求消息头转换为缓冲区
+     * @return ByteBuffer 缓冲区
+     */
+    public ByteBuffer pack() {
+        /// 分配缓冲区并获取消息头
+        ByteBuffer headBuf = ByteBuffer.allocate(headSize);
+        headBuf.put(headType);
+        headBuf.put(headSize);
+        headBuf.putShort(valueLen);
+        headBuf.putShort(paraCount);
+        headBuf.putShort(paraLen);
+
+        headBuf.flip();
+        return headBuf;
+    }
+    
+}
+
+

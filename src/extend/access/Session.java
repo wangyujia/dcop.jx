@@ -1,24 +1,19 @@
-package com.dcop.jx.test;
+package com.dcop.jx.core.extend.access;
 
 import com.dcop.jx.entry.*;
 import com.dcop.jx.entry.base.*;
 import com.dcop.jx.entry.kernel.*;
-import com.dcop.jx.core.base.log.*;
-import com.dcop.jx.core.*;
 
 
 /**
- * 对象测试类
+ * 会话对象
  */
-@ClassImport("test_object")
-public class TestObject implements IObject {
-
-    private static final String m_name = "TestObject";
+@ClassImport("session")
+public class Session implements IObject {
+    private static final String m_name = "Session";
     private IObject m_parent = null;
     private IObject m_root = null;
     private int m_id = 0;
-
-    public int testNo = 0;
 
 
     /// 构建入口
@@ -27,17 +22,7 @@ public class TestObject implements IObject {
         m_id = id;
         m_parent = parent;
 
-        Logs.record("trace", "'" + name() + "'(" + id() + ") Construct!");
-        String[] ss = cfg.split(";");
-        for (String s : ss) {
-            String[] cfgItems = s.split("=");
-            if (cfgItems.length >= 2) {
-                if (cfgItems[0].equals("TestNo")) {
-                    testNo = Integer.parseInt(cfgItems[1]);
-                    Logs.record("trace", "  TestNo=" + testNo);
-                }
-            }
-        }
+        
     }
 
 
@@ -72,7 +57,7 @@ public class TestObject implements IObject {
     @Override
     public ErrCode init(IObject root, Object[] arg) {
         m_root = root;
-        Logs.record("trace", "'" + name() + "'(" + id() + ") Init!");
+        System.out.println("'" + name() + "'(" + id() + ") Init!");
         return ErrCode.SUCCESS;
     }
 
@@ -80,14 +65,14 @@ public class TestObject implements IObject {
     /// 结束时入口
     @Override
     public void fini() {
-        Logs.record("trace", "'" + name() + "'(" + id() + ") Fini!");
+        System.out.println("'" + name() + "'(" + id() + ") Fini!");
     }
 
 
     /// 消息入口
     @Override
     public IMsg proc(IMsg msg) {
-        Logs.record("trace", "'" + name() + "'(" + id() + ") Proc Msg!");
+        System.out.println("'" + name() + "'(" + id() + ") Proc Msg!");
         return null;
     }
 
@@ -101,4 +86,5 @@ public class TestObject implements IObject {
     }
 
 }
+
 

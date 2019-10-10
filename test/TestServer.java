@@ -1,152 +1,142 @@
+package com.dcop.jx.test;
 
 import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
-import JX.*;
-import JX.Framework.*;
-import JX.Framework.Service.Msg.*;
-import JX.Framework.Service.Sock.*;
+
+import com.dcop.jx.entry.*;
+import com.dcop.jx.entry.base.*;
+import com.dcop.jx.entry.kernel.*;
+import com.dcop.jx.core.base.msg.*;
+import com.dcop.jx.core.base.log.*;
+import com.dcop.jx.core.*;
 
 
 /**
- * ¶ÔÏó²âÊÔÀà
+ * å¯¹è±¡æµ‹è¯•ç±»
  */
-public class TestServer implements IObject, ILanAppListener
-{
-    private static final String m_Name = "Server";
-    private IObject m_iParent = null;
-    private IObject m_iRoot = null;
-    private int m_ID = 0;
+@ClassImport("test_server")
+public class TestServer implements IObject, ILanEvent {
+
+    private static final String m_name = "TestServer";
+    private IObject m_parent = null;
+    private IObject m_root = null;
+    private int m_id = 0;
 
     private ILanApp m_lanApp = null;
     private int m_localPort = 0;
 
 
-    /// ¹¹½¨Èë¿Ú
+    /// æ„å»ºå…¥å£
     @Override
-    public void construct(int id, IObject parent, String cfg)
-    {
-        m_ID = id;
-        m_iParent = parent;
+    public void construct(int id, IObject parent, String cfg) {
+        m_id = id;
+        m_parent = parent;
 
-        System.out.println("'" + name() + "'(" + id() + ") Construct!");
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Construct!");
         String[] ss = cfg.split(";");
-        for (String s : ss)
-        {
+        for (String s : ss) {
             String[] cfgItems = s.split("=");
-            if (cfgItems.length >= 2)
-            {
-                if (cfgItems[0].equals("LocalPort"))
-                {
+            if (cfgItems.length >= 2) {
+                if (cfgItems[0].equals("LocalPort")) {
                     m_localPort = Integer.parseInt(cfgItems[1]);
-                    System.out.println("  LocalPort=" + m_localPort);
+                    Logs.record("trace", "  LocalPort=" + m_localPort);
                 }
             }
         }
     }
 
 
-    /// ¶ÔÏóÃû
+    /// å¯¹è±¡å
     @Override
-    public String name()
-    {
-        return m_Name;
+    public String name() {
+        return m_name;
     }
 
 
-    /// ¶ÔÏóID
+    /// å¯¹è±¡ID
     @Override
-    public int id()
-    {
-        return m_ID;
+    public int id() {
+        return m_id;
     }
 
 
-    /// ¸¸¶ÔÏó
+    /// çˆ¶å¯¹è±¡
     @Override
-    public IObject parent()
-    {
-        return m_iParent;
+    public IObject parent() {
+        return m_parent;
     }
 
 
-    /// ¸ù¶ÔÏó
-    public IObject root()
-    {
-        return m_iRoot;
+    /// æ ¹å¯¹è±¡
+    public IObject root() {
+        return m_root;
     }
 
 
-    /// ³õÊ¼»¯Èë¿Ú
+    /// åˆå§‹åŒ–å…¥å£
     @Override
-    public Errno init(IObject root, Object[] arg)
-    {
-        m_iRoot = root;
+    public ErrCode init(IObject root, Object[] arg) {
+        m_root = root;
 
-        m_lanApp = (ILanApp)ModuleList.factory.newInstance("LanApp");
-        if (m_lanApp == null)
-        {
-            System.out.println("'" + name() + "'(" + id() + ") Init Fail! LanApp Create Fail!");
-            return Errno.FAILURE;
+        m_lanApp = (ILanApp)ModuleList.factory.newInstance("lan");
+        if (m_lanApp == null) {
+            Logs.record("trace", "'" + name() + "'(" + id() + ") Init Fail! LanApp Create Fail!");
+            return ErrCode.FAILURE;
         }
 
         m_lanApp.addTCPServer(1, m_localPort);
-        m_lanApp.start(id(), 1024, 1000, this);
+        m_lanApp.start("TestServer", id(), 10240, 1000, this);
 
-        System.out.println("'" + name() + "'(" + id() + ") Init!");
-        return Errno.SUCCESS;
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Init!");
+        return ErrCode.SUCCESS;
     }
 
 
-    /// ½áÊøÊ±Èë¿Ú
+    /// ç»“æŸæ—¶å…¥å£
     @Override
-    public void fini()
-    {
-        if (m_lanApp != null)
-        {
+    public void fini() {
+        if (m_lanApp != null) {
             m_lanApp.stop();
+            m_lanApp = null;
         }
-        System.out.println("'" + name() + "'(" + id() + ") Fini!");
+
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Fini!");
     }
 
 
-    /// ÏûÏ¢Èë¿Ú
+    /// æ¶ˆæ¯å…¥å£
     @Override
-    public void proc(Object msg)
-    {
-        System.out.println("'" + name() + "'(" + id() + ") Proc Msg!");
+    public IMsg proc(IMsg msg) {
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Proc Msg!");
+        return null;
     }
 
 
-    /// DumpÈë¿Ú
+    /// Dumpå…¥å£
     @Override
-    public String dump()
-    {
+    public String dump() {
         String out = name() + " Dump: \n";
         out += String.format("  My ID is:%d \n", id());
         return out;
     }
 
 
-    /// TCP·şÎñÆ÷ÊÕµ½¿Í»§¶ËÁ¬½Ó
+    /// TCPæœåŠ¡å™¨æ”¶åˆ°å®¢æˆ·ç«¯è¿æ¥
     @Override
-    public boolean onAccept(int channelID, ServerSocketChannel server, SocketChannel accept)
-    {
+    public boolean onAccept(int channelID, ServerSocketChannel server, SocketChannel accept) {
         InetSocketAddress remoteAddress = (InetSocketAddress)accept.socket().getRemoteSocketAddress();
-        System.out.println("·şÎñÆ÷ÊÕµ½¿Í»§¶ËÁ¬½Ó(" + 
+        Logs.record("trace", "æœåŠ¡å™¨æ”¶åˆ°å®¢æˆ·ç«¯è¿æ¥(" + 
                         remoteAddress.getAddress().getHostAddress() + ":" + 
                         remoteAddress.getPort() + 
                         ") [Channel:" + channelID + "]");
 
         String message = "This Hello From Server(" + id() + ")";
-        try
-        {
+        try {
             accept.write(new MsgPacket().addData(ByteBuffer.wrap(message.getBytes())).pack());
             return true;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -154,42 +144,38 @@ public class TestServer implements IObject, ILanAppListener
     }
 
 
-    /// TCP¿Í»§¶ËÁ¬½ÓÉÏ·şÎñÆ÷
+    /// TCPå®¢æˆ·ç«¯è¿æ¥ä¸ŠæœåŠ¡å™¨
     @Override
-    public boolean onConnect(int channelID, SocketChannel client)
-    {
+    public boolean onConnect(int channelID, SocketChannel client) {
         return false;
     }
 
 
-    /// TCPÁ¬½ÓÖĞ¶Ï
+    /// TCPè¿æ¥ä¸­æ–­
     @Override
-    public void onDisconnect(int channelID, SocketChannel channel)
-    {
+    public void onDisconnect(int channelID, SocketChannel channel) {
         InetSocketAddress remoteAddress = (InetSocketAddress)channel.socket().getRemoteSocketAddress();
-        System.out.println("·şÎñÆ÷ºÍ¿Í»§¶ËÁ¬½ÓÖĞ¶Ï(" + 
+        Logs.record("trace", "æœåŠ¡å™¨å’Œå®¢æˆ·ç«¯è¿æ¥ä¸­æ–­(" + 
                         remoteAddress.getAddress().getHostAddress() + ":" + 
                         remoteAddress.getPort() + 
                         ") [Channel:" + channelID + "]");
     }
 
 
-    /// TCPÊÕµ½Êı¾İ
+    /// TCPæ”¶åˆ°æ•°æ®
     @Override
-    public void onRecv(int channelID, SocketChannel channel, MsgPacket msg)
-    {
+    public void onRecv(int channelID, SocketChannel channel, IMsg msg) {
         InetSocketAddress remoteAddress = (InetSocketAddress)channel.socket().getRemoteSocketAddress();
-        System.out.println("·şÎñÆ÷ÊÕµ½Êı¾İ:'" + new String(msg.data.array()) + "' From(" + 
+        Logs.record("trace", "æœåŠ¡å™¨æ”¶åˆ°æ•°æ®:'" + new String(msg.getData().array()) + "' From(" + 
                         remoteAddress.getAddress().getHostAddress() + ":" + 
                         remoteAddress.getPort() + 
                         ") [Channel:" + channelID + "]");
     }
 
 
-    /// UDPÊÕµ½Êı¾İ
+    /// UDPæ”¶åˆ°æ•°æ®
     @Override
-    public void onRecv(int channelID, DatagramChannel channel, SocketAddress remote, MsgPacket msg)
-    {
+    public void onRecv(int channelID, DatagramChannel channel, SocketAddress remote, IMsg msg) {
     }
 
 }

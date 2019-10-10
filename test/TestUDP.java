@@ -1,23 +1,28 @@
+package com.dcop.jx.test;
 
 import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
-import JX.*;
-import JX.Framework.*;
-import JX.Framework.Service.Msg.*;
-import JX.Framework.Service.Sock.*;
+
+import com.dcop.jx.entry.*;
+import com.dcop.jx.entry.base.*;
+import com.dcop.jx.entry.kernel.*;
+import com.dcop.jx.core.base.msg.*;
+import com.dcop.jx.core.base.log.*;
+import com.dcop.jx.core.*;
 
 
 /**
- * ∂‘œÛ≤‚ ‘¿‡
+ * ÂØπË±°ÊµãËØïÁ±ª
  */
-public class TestUDP implements IObject, ILanAppListener
+@ClassImport("test_udp")
+public class TestUDP implements IObject, ILanEvent
 {
-    private static final String m_Name = "UDP";
-    private IObject m_iParent = null;
-    private IObject m_iRoot = null;
-    private int m_ID = 0;
+    private static final String m_name = "TestUDP";
+    private IObject m_parent = null;
+    private IObject m_root = null;
+    private int m_id = 0;
 
     private ILanApp m_lanApp = null;
     private int m_localPort = 0;
@@ -25,170 +30,150 @@ public class TestUDP implements IObject, ILanAppListener
     private int m_remotePort = 0;
 
 
-    /// ππΩ®»Îø⁄
+    /// ÊûÑÂª∫ÂÖ•Âè£
     @Override
-    public void construct(int id, IObject parent, String cfg)
-    {
-        m_ID = id;
-        m_iParent = parent;
+    public void construct(int id, IObject parent, String cfg) {
+        m_id = id;
+        m_parent = parent;
 
-        System.out.println("'" + name() + "'(" + id() + ") Construct!");
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Construct!");
         String[] ss = cfg.split(";");
-        for (String s : ss)
-        {
+        for (String s : ss) {
             String[] cfgItems = s.split("=");
-            if (cfgItems.length >= 2)
-            {
-                if (cfgItems[0].equals("LocalPort"))
-                {
+            if (cfgItems.length >= 2) {
+                if (cfgItems[0].equals("LocalPort")) {
                     m_localPort = Integer.parseInt(cfgItems[1]);
-                    System.out.println("  LocalPort=" + m_localPort);
+                    Logs.record("trace", "  LocalPort=" + m_localPort);
                 }
 
-                if (cfgItems[0].equals("RemoteIP"))
-                {
+                if (cfgItems[0].equals("RemoteIP")) {
                     m_remoteIP = cfgItems[1];
-                    System.out.println("  RemoteIP=" + m_remoteIP);
+                    Logs.record("trace", "  RemoteIP=" + m_remoteIP);
                 }
 
-                if (cfgItems[0].equals("RemotePort"))
-                {
+                if (cfgItems[0].equals("RemotePort")) {
                     m_remotePort = Integer.parseInt(cfgItems[1]);
-                    System.out.println("  RemotePort=" + m_remotePort);
+                    Logs.record("trace", "  RemotePort=" + m_remotePort);
                 }
             }
         }
     }
 
 
-    /// ∂‘œÛ√˚
+    /// ÂØπË±°Âêç
     @Override
-    public String name()
-    {
-        return m_Name;
+    public String name() {
+        return m_name;
     }
 
 
-    /// ∂‘œÛID
+    /// ÂØπË±°ID
     @Override
-    public int id()
-    {
-        return m_ID;
+    public int id() {
+        return m_id;
     }
 
 
-    /// ∏∏∂‘œÛ
+    /// Áà∂ÂØπË±°
     @Override
-    public IObject parent()
-    {
-        return m_iParent;
+    public IObject parent() {
+        return m_parent;
     }
 
 
-    /// ∏˘∂‘œÛ
-    public IObject root()
-    {
-        return m_iRoot;
+    /// Ê†πÂØπË±°
+    public IObject root() {
+        return m_root;
     }
 
 
-    /// ≥ı ºªØ»Îø⁄
+    /// ÂàùÂßãÂåñÂÖ•Âè£
     @Override
-    public Errno init(IObject root, Object[] arg)
-    {
-        m_iRoot = root;
+    public ErrCode init(IObject root, Object[] arg) {
+        m_root = root;
 
-        m_lanApp = (ILanApp)ModuleList.factory.newInstance("LanApp");
-        if (m_lanApp == null)
-        {
-            System.out.println("'" + name() + "'(" + id() + ") Init Fail! LanApp Create Fail!");
-            return Errno.FAILURE;
+        m_lanApp = (ILanApp)ModuleList.factory.newInstance("lan");
+        if (m_lanApp == null) {
+            Logs.record("trace", "'" + name() + "'(" + id() + ") Init Fail! LanApp Create Fail!");
+            return ErrCode.FAILURE;
         }
 
         m_lanApp.addUDP(1, true, m_localPort, true);
-        m_lanApp.start(id(), 1024, 1000, this);
+        m_lanApp.start("TestUDP", id(), 1024, 1000, this);
 
-        System.out.println("'" + name() + "'(" + id() + ") Init!");
-        return Errno.SUCCESS;
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Init!");
+        return ErrCode.SUCCESS;
     }
 
 
-    /// Ω· ¯ ±»Îø⁄
+    /// ÁªìÊùüÊó∂ÂÖ•Âè£
     @Override
-    public void fini()
-    {
-        if (m_lanApp != null)
-        {
+    public void fini() {
+        if (m_lanApp != null) {
             m_lanApp.stop();
         }
-        System.out.println("'" + name() + "'(" + id() + ") Fini!");
+
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Fini!");
     }
 
 
-    /// œ˚œ¢»Îø⁄
+    /// Ê∂àÊÅØÂÖ•Âè£
     @Override
-    public void proc(Object msg)
-    {
-        System.out.println("'" + name() + "'(" + id() + ") Proc Msg!");
-        if (m_lanApp != null)
-        {
-            for (int i = 0; i < 10; ++i)
-            {
+    public IMsg proc(IMsg msg) {
+        Logs.record("trace", "'" + name() + "'(" + id() + ") Proc Msg!");
+        if (m_lanApp != null) {
+            for (int i = 0; i < 10; ++i) {
                 try { Thread.sleep(100); } catch (InterruptedException e) {}
 
                 String message = "UDP Send No:" + (i + 1);
                 m_lanApp.send(m_remoteIP, m_remotePort, new MsgPacket().addData(ByteBuffer.wrap(message.getBytes())), 0);
             }
         }
+
+        return null;
     }
 
 
-    /// Dump»Îø⁄
+    /// DumpÂÖ•Âè£
     @Override
-    public String dump()
-    {
+    public String dump() {
         String out = name() + " Dump: \n";
         out += String.format("  My ID is:%d \n", id());
         return out;
     }
 
 
-    /// TCP∑˛ŒÒ∆˜ ’µΩøÕªß∂À¡¨Ω”
+    /// TCPÊúçÂä°Âô®Êî∂Âà∞ÂÆ¢Êà∑Á´ØËøûÊé•
     @Override
-    public boolean onAccept(int channelID, ServerSocketChannel server, SocketChannel accept)
-    {
+    public boolean onAccept(int channelID, ServerSocketChannel server, SocketChannel accept) {
         return false;
     }
 
 
-    /// TCPøÕªß∂À¡¨Ω”…œ∑˛ŒÒ∆˜
+    /// TCPÂÆ¢Êà∑Á´ØËøûÊé•‰∏äÊúçÂä°Âô®
     @Override
-    public boolean onConnect(int channelID, SocketChannel client)
-    {
+    public boolean onConnect(int channelID, SocketChannel client) {
         return false;
     }
 
 
-    /// TCP¡¨Ω”÷–∂œ
+    /// TCPËøûÊé•‰∏≠Êñ≠
     @Override
-    public void onDisconnect(int channelID, SocketChannel channel)
-    {
+    public void onDisconnect(int channelID, SocketChannel channel) {
     }
 
 
-    /// TCP ’µΩ ˝æ›
+    /// TCPÊî∂Âà∞Êï∞ÊçÆ
     @Override
-    public void onRecv(int channelID, SocketChannel channel, MsgPacket msg)
-    {
+    public void onRecv(int channelID, SocketChannel channel, IMsg msg) {
     }
 
 
-    /// UDP ’µΩ ˝æ›
+    /// UDPÊî∂Âà∞Êï∞ÊçÆ
     @Override
-    public void onRecv(int channelID, DatagramChannel channel, SocketAddress remote, MsgPacket msg)
-    {
+    public void onRecv(int channelID, DatagramChannel channel, SocketAddress remote, IMsg msg) {
         InetSocketAddress remoteAddress = (InetSocketAddress)remote;
-        System.out.println("UDP ’µΩ ˝æ›:'" + new String(msg.data.array()) + "' From(" + 
+        Logs.record("trace", "UDPÊî∂Âà∞Êï∞ÊçÆ:'" + new String(msg.getData().array()) + "' From(" + 
                         remoteAddress.getAddress().getHostAddress() + ":" + 
                         remoteAddress.getPort() + 
                         ") [Channel:" + channelID + "]");
